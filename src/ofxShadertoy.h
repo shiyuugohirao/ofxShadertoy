@@ -13,7 +13,10 @@ class ofxShadertoy: public ofBaseDraws {
 protected:
     ofShader shader;
     ofTexture channel0, channel1, channel2, channel3;
-    bool useMouse, advanceTime;
+    bool useMouse, advanceTime, useAutoUpdate;
+    long lastUpdateTime;
+    string shaderfile;
+    bool chancube[4];
     ofVec2f mousepos;
     ofVec2f dimensions;
     ofCamera *camera;
@@ -30,6 +33,7 @@ public:
     virtual void end() const;
     virtual void update(ofEventArgs&);
     virtual void setUseMouse(bool);
+    virtual void setUseAutoUpdate(bool);
     virtual void setAdvanceTime(bool);
     virtual void draw(float x, float y) const { draw(x, y, 0, dimensions.x, dimensions.y); }
     virtual void draw(float x, float y, float w, float h) const { draw(x, y, 0, w, h); }

@@ -20,6 +20,11 @@ ofxShadertoy::~ofxShadertoy() {
 }
 
 bool ofxShadertoy::load(string shaderfilename, bool chan0cube, bool chan1cube, bool chan2cube, bool chan3cube) {
+    shaderfile = ofToDataPath(shaderfilename, true);
+    chancube[0] = chan0cube;
+    chancube[1] = chan1cube;
+    chancube[2] = chan2cube;
+    chancube[3] = chan3cube;
     ofShader currentShader;
     currentShader.setupShaderFromSource(GL_VERTEX_SHADER, string("#version 330\n"
                                                                  "precision mediump float;"
@@ -29,6 +34,7 @@ bool ofxShadertoy::load(string shaderfilename, bool chan0cube, bool chan1cube, b
                                                                  "void main(){"
                                                                  "    gl_Position = modelViewProjectionMatrix * position;"
                                                                  "}\n"));
+
     ofFile f;
     f.open(shaderfilename);
     ofBuffer b = f.readToBuffer();
@@ -123,6 +129,17 @@ void ofxShadertoy::update(ofEventArgs &event) {
     if(useMouse && ofGetMousePressed()) {
         mousepos.set(ofGetMouseX(), ofGetMouseY());
     }
+    // Added to use autoUpdate
+    if(useAutoUpdate && ofFile::doesFileExist(shaderfile)){
+        long latestUpdate = std::filesystem::last_write_time(shaderfile);
+        if (lastUpdateTime != latestUpdate){
+            ofLogVerbose("ofxGLSLSandbox")<<"update shaderfile!";
+            lastUpdateTime = latestUpdate;
+            load(shaderfile,chancube[0],chancube[1],chancube[2],chancube[3]);
+        }
+    }else{
+        ofLogVerbose("ofxGLSLSandbox")<<"not found " + shaderfile;
+    }
 }
 
 void ofxShadertoy::setAdvanceTime(bool advance) {
@@ -131,6 +148,9 @@ void ofxShadertoy::setAdvanceTime(bool advance) {
 
 void ofxShadertoy::setUseMouse(bool use) {
     useMouse = use;
+}
+void ofxShadertoy::setUseAutoUpdate(bool use) {
+    useAutoUpdate = use;
 }
 
 void ofxShadertoy::setCamera(ofCamera* cam) {
@@ -157,16 +177,16 @@ void ofxShadertoy::setTexture(int index, const ofTexture& tex) {
 void ofxShadertoy::setTexture(int index, ofFbo const & tex) {
     switch (index) {
     case 0:
-        channel0 = tex.getTextureReference(0);
+        channel0 = tex.getTexture(0);
         break;
     case 1:
-        channel1 = tex.getTextureReference(0);
+        channel1 = tex.getTexture(0);
         break;
     case 2:
-        channel2 = tex.getTextureReference(0);
+        channel2 = tex.getTexture(0);
         break;
     case 3:
-        channel3 = tex.getTextureReference(0);
+        channel3 = tex.getTexture(0);
         break;
     }
 }
